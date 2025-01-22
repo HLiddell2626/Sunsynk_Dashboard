@@ -3,6 +3,7 @@
 # --- By Harrison Liddell --------------------------
 # --------------------------------------------------
 
+
 # Importing required libraries
 import streamlit as st  # Streamlit is used to create the web dashboard for interactive data visualization
 import pandas as pd  # Pandas is used for data manipulation and analysis
@@ -147,6 +148,15 @@ if uploaded_file:
         if st.button("Generate Forecast"):
             st.session_state.generate_forecast = True
 
+    #-------------- Sidebar: Customisation Section --------------
+    with st.sidebar.expander('Customisation Options', expanded=False):
+        # Colour Customisation (for plots and the dashboard)
+        primary_colour = st.color_picker("Select Primary Colour", "#1f77b4")
+        secondary_colour = st.color_picker("Select Secondary Colour", "#ff7f0e")
+
+        # Line and Marker Customisation
+        line_width = st.slider("Line Width", 1, 10, 2)
+        marker_size = st.slider("Marker Size", 5, 15, 8)
 
     #-------------- Main Body: Display Plot --------------
     if 'x_axis' in st.session_state and 'y_axis' in st.session_state:
@@ -181,7 +191,7 @@ if uploaded_file:
                                 mode='markers',
                                 name=f"{x} vs {y}",  # Legend name for the trace
                                 marker=dict(
-                                    size=8,  # Marker size
+                                    size=marker_size,  # Marker size
                                     color=random_marker_color  # Random colour for the marker
                                 ),
                             )
@@ -195,7 +205,7 @@ if uploaded_file:
                                 mode='lines',
                                 name=f"{x} vs {y}",  # Legend name for the trace
                                 line=dict(
-                                    width=2,  # Line width
+                                    width=line_width,  # Line width
                                     color=random_line_color  # Random colour for the line
                                 ),
                             )
@@ -249,42 +259,42 @@ if uploaded_file:
         # Creating a forecast plot
         fig = go.Figure()
 
-        random_forecast_marker_color = random_colour()
+        random_forecast_marker_color = random_colour()  # Random colour for forecast markers
+        random_forecast_line_color = random_colour()  # Random colour for forecast lines
 
         if forecast_plot_type == "Scatter Plot":
+            # Adding scatter plot for the forecast
             fig.add_trace(
                 go.Scatter(
                     x=forecast_df[forecast_timestamp],
                     y=forecast_df[forecast_target],
-                    mode="markers",
-                    name="Forecasted Data",
-                    marker=dict(
-                        size=8,
-                        color=random_forecast_marker_color
-                    ),
+                    mode='markers',
+                    name=f"Forecasted {forecast_target}",
+                    marker=dict(size=8, color=random_forecast_marker_color)
                 )
             )
         elif forecast_plot_type == "Line Graph":
+            # Adding line graph for the forecast
             fig.add_trace(
                 go.Scatter(
                     x=forecast_df[forecast_timestamp],
                     y=forecast_df[forecast_target],
-                    mode="lines",
-                    name="Forecasted Data",
-                    line=dict(
-                        width=2,
-                        color=random_forecast_marker_color
-                    ),
+                    mode='lines',
+                    name=f"Forecasted {forecast_target}",
+                    line=dict(width=2, color=random_forecast_line_color)
                 )
             )
 
-        # Updating layout for the forecast plot
+        # Updating layout of the forecast plot
         fig.update_layout(
-            title="Forecast Plot",
+            title=f"{forecast_target} Forecast",
             xaxis_title=forecast_timestamp,
             yaxis_title=forecast_target,
             hovermode="closest",
-            template="plotly"
+            template="plotly",
+            xaxis=dict(
+                tickformat="%Y-%m-%d %H:%M:%S"  # Formatting timestamp to human-readable date
+            )
         )
 
         # Displaying the forecast plot
