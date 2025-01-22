@@ -22,3 +22,20 @@ st.set_page_config(page_title="Sunsynk - .CSV Dashboard", layout="wide")
 
 #-------------- Title of the Dashboard --------------
 st.title("Sunsynk - .CSV Dashboard")
+
+#-------------- Sidebar for user interaction --------------
+st.sidebar.header("Upload Your Dataset")
+uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type=["csv"])
+
+# Checking if a file is uploaded
+if uploaded_file:
+    #-------------- Loading and Displaying the Dataset --------------
+    # Loading the uploaded CSV dataset into a DataFrame
+    data = pd.read_csv(uploaded_file)
+
+    # Displaying a preview of the dataset in the main body of the app
+    st.header("Dataset Preview")
+    st.dataframe(data.head())  # Displaying the first 5 rows of the dataset
+
+else:
+    st.info("Please upload a CSV file to get started.") # error handling incase the .csv file is not recognised
