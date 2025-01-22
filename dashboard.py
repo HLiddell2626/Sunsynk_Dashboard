@@ -47,6 +47,65 @@ if uploaded_file:
         except Exception as e:
             pass  # If it cannot be converted, simply leave the column as is
 
-    
+    #-------------- Sidebar: Plotting Section --------------
+    with st.sidebar.expander('Plotting Options', expanded=False):
+        # Identifying numeric and datetime columns for plotting
+        numeric_columns = data.select_dtypes(include=["float", "int"]).columns
+        datetime_columns = data.select_dtypes(include=["datetime"]).columns
+
+        # Combining the numeric and datetime columns for easier selection in the dropdown
+        available_columns = list(numeric_columns) + list(datetime_columns)
+
+        if len(available_columns) > 0:
+            # If no search terms are set, initialise them to an empty string
+            if 'x_search' not in st.session_state:
+                st.session_state.x_search = ""
+            if 'y_search' not in st.session_state:
+                st.session_state.y_search = ""
+
+            # Allowing the user to search for columns for the X-axis and Y-axis
+            x_search = st.text_input("Search and filter X-axis columns:", st.session_state.x_search)
+            y_search = st.text_input("Search and filter Y-axis columns:", st.session_state.y_search)
+
+            # Updating the session state with the new search query
+            st.session_state.x_search = x_search
+            st.session_state.y_search = y_search
+
+            # Filtering available columns based on the search query
+            x_options = [col for col in available_columns if x_search.lower() in col.lower()]
+            y_options = [col for col in available_columns if y_search.lower() in col.lower()]
+
+            # Providing multi-select dropdowns for selecting columns for X and Y axes
+            x_axis = st.multiselect(
+                "Search and select columns for X-axis:",
+                options=x_options,
+                help="Start typing to search for column names."
+            )
+            y_axis = st.multiselect(
+                "Search and select columns for Y-axis:",
+                options=y_options,
+                help="Start typing to search for column names."
+            )
+
+            # Storing selected options in the session state to persist them across interactions
+            st.session_state.x_axis = x_axis
+            st.session_state.y_axis = y_axis
+
+            # Providing a radio button to choose the plot type (scatter or line graph)
+            plot_type = st.radio(
+                "Select Plot Type",
+                options=["Scatter Plot", "Line Graph"],
+                help="Choose between a scatter plot or a line graph."
+            )
+
+            # Storing the selected plot type in session state
+            st.session_state.plot_type = plot_type
+
+            # Adding a button to generate the plot inside the sidebar
+            if st.button("Generate Plot"):
+                st.session_state.generate_plot = True
+        else:
+            st.warning("The dataset must have at least one numeric or datetime column for plotting.")
+
 else:
     st.info("Please upload a CSV file to get started.") # error handling incase the .csv file is not recognised
