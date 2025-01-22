@@ -222,5 +222,76 @@ if uploaded_file:
         else:
             st.warning("Please select at least one column for both X-axis and Y-axis.")
 
+    #-------------- Main Body: Display Forecasting Results --------------
+    if 'forecast_target' in st.session_state and 'forecast_timestamp' in st.session_state and 'generate_forecast' in st.session_state and st.session_state.generate_forecast:
+        forecast_target = st.session_state.forecast_target
+        forecast_timestamp = st.session_state.forecast_timestamp
+        forecast_horizon = st.session_state.forecast_horizon
+        forecast_plot_type = st.session_state.forecast_plot_type
+
+        # Preparing the data for forecasting by selecting the relevant timestamp and target columns
+        data_for_forecasting = data[[forecast_timestamp, forecast_target]].dropna()
+
+        # Creating a forecast DataFrame (this is just simulated data for now, using random values)
+        forecast_df = pd.DataFrame({
+            forecast_timestamp: pd.date_range(
+                start=data_for_forecasting[forecast_timestamp].iloc[-1] + pd.Timedelta(days=1),
+                periods=forecast_horizon,
+                freq="D"  # Forecast daily intervals
+            ),
+            forecast_target: np.random.random(forecast_horizon)  # Random values for forecasted target
+        })
+
+        # Displaying the forecasted data table
+        st.subheader("Forecasted Data")
+        st.dataframe(forecast_df)
+
+        # Creating a forecast plot
+        fig = go.Figure()
+
+        random_forecast_marker_color = random_colour()
+
+        if forecast_plot_type == "Scatter Plot":
+            fig.add_trace(
+                go.Scatter(
+                    x=forecast_df[forecast_timestamp],
+                    y=forecast_df[forecast_target],
+                    mode="markers",
+                    name="Forecasted Data",
+                    marker=dict(
+                        size=8,
+                        color=random_forecast_marker_color
+                    ),
+                )
+            )
+        elif forecast_plot_type == "Line Graph":
+            fig.add_trace(
+                go.Scatter(
+                    x=forecast_df[forecast_timestamp],
+                    y=forecast_df[forecast_target],
+                    mode="lines",
+                    name="Forecasted Data",
+                    line=dict(
+                        width=2,
+                        color=random_forecast_marker_color
+                    ),
+                )
+            )
+
+        # Updating layout for the forecast plot
+        fig.update_layout(
+            title="Forecast Plot",
+            xaxis_title=forecast_timestamp,
+            yaxis_title=forecast_target,
+            hovermode="closest",
+            template="plotly"
+        )
+
+        # Displaying the forecast plot
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Resetting the forecast generation flag
+        st.session_state.generate_forecast = False
+
 else:
     st.info("Please upload a CSV file to get started.") # error handling incase the .csv file is not recognised
