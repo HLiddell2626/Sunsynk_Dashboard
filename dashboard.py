@@ -107,5 +107,79 @@ if uploaded_file:
         else:
             st.warning("The dataset must have at least one numeric or datetime column for plotting.")
 
+    #-------------- Main Body: Display Plot --------------
+    if 'x_axis' in st.session_state and 'y_axis' in st.session_state:
+        x_axis = st.session_state.x_axis
+        y_axis = st.session_state.y_axis
+        plot_type = st.session_state.plot_type
+
+        if len(x_axis) > 0 and len(y_axis) > 0 and 'generate_plot' in st.session_state and st.session_state.generate_plot:
+            # Adding a button to create the plot inside the sidebar
+            # Filtering the data to include only the selected X and Y axis columns
+            filtered_data = data[x_axis + y_axis]
+
+            # Displaying the filtered dataset in the app
+            st.subheader(f"Filtered Dataset: {', '.join(x_axis + y_axis)}")
+            st.dataframe(filtered_data)
+
+            # Creating a figure for the plot
+            fig = go.Figure()
+
+            # Looping through each combination of X and Y columns to add traces to the plot
+            for x in x_axis:
+                for y in y_axis:
+                    random_marker_color = random_colour()  # Random colour for marker
+                    random_line_color = random_colour()  # Random colour for line
+
+                    if plot_type == "Scatter Plot":
+                        # Adding scatter plot traces
+                        fig.add_trace(
+                            go.Scatter(
+                                x=filtered_data[x],  # Use datetime columns directly for the x-axis
+                                y=filtered_data[y],
+                                mode='markers',
+                                name=f"{x} vs {y}",  # Legend name for the trace
+                                marker=dict(
+                                    size=8,  # Marker size
+                                    color=random_marker_color  # Random colour for the marker
+                                ),
+                            )
+                        )
+                    elif plot_type == "Line Graph":
+                        # Adding line graph traces
+                        fig.add_trace(
+                            go.Scatter(
+                                x=filtered_data[x],  # Use datetime columns directly for the x-axis
+                                y=filtered_data[y],
+                                mode='lines',
+                                name=f"{x} vs {y}",  # Legend name for the trace
+                                line=dict(
+                                    width=2,  # Line width
+                                    color=random_line_color  # Random colour for the line
+                                ),
+                            )
+                        )
+
+            # Updating layout for better readability
+            fig.update_layout(
+                title="Comparison Plot",
+                xaxis_title="X-axis",
+                yaxis_title="Y-axis",
+                legend_title="Series",
+                hovermode="closest",  # Hover over points to show info
+                template="plotly",
+                xaxis=dict(
+                    tickformat="%Y-%m-%d %H:%M:%S"  # Format timestamp to human-readable date
+                )
+            )
+
+            # Displaying the plot in the main body
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Resetting the plot generation flag
+            st.session_state.generate_plot = False
+        else:
+            st.warning("Please select at least one column for both X-axis and Y-axis.")
+
 else:
     st.info("Please upload a CSV file to get started.") # error handling incase the .csv file is not recognised
