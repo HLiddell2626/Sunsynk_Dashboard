@@ -37,5 +37,16 @@ if uploaded_file:
     st.header("Dataset Preview")
     st.dataframe(data.head())  # Displaying the first 5 rows of the dataset
 
+    #-------------- Converting Timestamp Columns --------------
+    # Looking for columns with object data type (likely timestamps) and attempting to convert them to datetime format
+    timestamp_columns = data.select_dtypes(include=["object"]).columns
+    for col in timestamp_columns:
+        try:
+            # Attempting to parse the timestamp format '2024-11-25_12-53-25'
+            data[col] = pd.to_datetime(data[col], format="%Y-%m-%d_%H-%M-%S", errors='ignore')
+        except Exception as e:
+            pass  # If it cannot be converted, simply leave the column as is
+
+    
 else:
     st.info("Please upload a CSV file to get started.") # error handling incase the .csv file is not recognised
