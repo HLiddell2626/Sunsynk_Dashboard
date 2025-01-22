@@ -107,6 +107,47 @@ if uploaded_file:
         else:
             st.warning("The dataset must have at least one numeric or datetime column for plotting.")
 
+    #-------------- Sidebar: Forecasting Section --------------
+    with st.sidebar.expander('Forecasting Options', expanded=False):
+        # Selecting the timestamp column for X-axis and numeric column to predict (Y-axis)
+        timestamp_columns = data.select_dtypes(include=["datetime"]).columns
+        numeric_columns = data.select_dtypes(include=["float", "int"]).columns
+
+        # Forecasting target: Selecting numeric column to forecast
+        forecast_target = st.selectbox(
+            "Select Column to Forecast (Target)",
+            options=numeric_columns,
+            help="Choose the numeric column to forecast."
+        )
+
+        # Forecasting feature: Selecting timestamp column as feature (independent variable)
+        forecast_timestamp = st.selectbox(
+            "Select Timestamp Column",
+            options=timestamp_columns,
+            help="Choose the timestamp column as feature for forecasting."
+        )
+
+        # Forecasting horizon (number of future points to predict)
+        forecast_horizon = st.slider("Forecast Horizon", 1, 30, 10)
+
+        # Selecting the plot type for the forecast (Line or Scatter)
+        forecast_plot_type = st.radio(
+            "Select Forecast Plot Type",
+            options=["Scatter Plot", "Line Graph"],
+            help="Choose between a scatter plot or a line graph for the forecast."
+        )
+
+        # Storing selected forecasting options in session state
+        st.session_state.forecast_target = forecast_target
+        st.session_state.forecast_timestamp = forecast_timestamp
+        st.session_state.forecast_horizon = forecast_horizon
+        st.session_state.forecast_plot_type = forecast_plot_type
+
+        # Adding a button to generate the forecast inside the sidebar
+        if st.button("Generate Forecast"):
+            st.session_state.generate_forecast = True
+
+
     #-------------- Main Body: Display Plot --------------
     if 'x_axis' in st.session_state and 'y_axis' in st.session_state:
         x_axis = st.session_state.x_axis
